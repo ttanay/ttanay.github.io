@@ -3,23 +3,29 @@ markdown:         kramdown
 highlighter:      rouge
 
 # Setup
-title:            Hydeout
-tagline:          'A Jekyll theme'
-description:      'The <a href="http://hyde.getpoole.com" target="_blank">Hyde</a> theme for <a href="http://jekyllrb.com" target="_blank">Jekyll</a>, refreshed.'
-url:              https://fongandrew.github.io
-baseurl:          '/hydeout'
+title:            Tanay Tummalapalli
+tagline:          'Living in the material world'
+description:      "Engineer | Musician | Professional Yak Shaver"
+url:              https://ttanay.github.io
+baseurl:          '/'
                   # the optional subpath of your site, e.g. "/blog"
                   # NB: This applies to all pages in your Jekyll site.
                   # If you want to move just the blog index pages but keep
                   # other pages at root, see the paginate_path and
                   # sidebar_blog_link below.
 
+socials:
+  github_profile: https://github.com/ttanay/
+  linkedin_profile: https://www.linkedin.com/in/ttanay/
+  twitter_profile: https://twitter.com/_ttanay
+
+
 author:
-  name:           'Andrew Fong'
-  url:            https://twitter.com/fongandrewc
+  name:           'Tanay Tummalapalli'
+  url:            https://twitter.com/_ttanay
 
 paginate:         5
-# paginate_path:    '/page:num'
+paginate_path:    '/blog/page:num'
                     # Or '/blog/page:num' if you want to move your index pages
 
 plugins:
@@ -28,8 +34,13 @@ plugins:
   - jekyll-paginate
 
 # Sidebar link settings
-sidebar_home_link:  true
-# sidebar_blog_link:  '/blog'   # By default, your home page is your blog
+sidebar_home_link:  false
+sidebar_blog_link:  '/blog'   # By default, your home page is your blog
                                 # page. If you change your paginate_path,
                                 # set this to the root of the paginate_path
                                 # to enable a separate blog link.
+
+titles_from_headings:
+  enabled:     true
+  strip_title: true
+  collections: false
