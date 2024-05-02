@@ -11,4 +11,4 @@ I currently work as a freelance Software Engineer.
 
 I like building software for Data, Infrastructure, and Tooling. 
 
-I'm also interested in Music, Comedy, Films, Math, and Comedy. 
+I'm also interested in Music, Films, Math, and Comedy. 
