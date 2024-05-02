@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Clickhouse on Tanay Tummalapalli</title>
+    <link>https://ttanay.github.io/tags/clickhouse/</link>
+    <description>Recent content in Clickhouse on Tanay Tummalapalli</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 24 Mar 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://ttanay.github.io/tags/clickhouse/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Query Processing In Clickhouse</title>
+      <link>https://ttanay.github.io/blog/query-processing-in-clickhouse/</link>
+      <pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate>
+      <guid>https://ttanay.github.io/blog/query-processing-in-clickhouse/</guid>
+      <description>ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.&#xA;This post is latest as on 835afe1f342.&#xA;Introduction ClickHouse is a columnar, vectorized OLAP database written in C++. We will take an example read query, and look at how the query is processed.</description>
+    </item>
+  </channel>
+</rss>
