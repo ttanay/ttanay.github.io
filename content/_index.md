@@ -1,5 +1,5 @@
 +++
-title = 'Tanay Tummalapalli'
+title = 'About Me'
 date = 2024-05-02T06:24:48+05:30
 +++
 ![hello](/dp.png)
