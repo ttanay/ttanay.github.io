@@ -34,7 +34,7 @@ For any given height \\(h\\), the total number of nodes in the tree \\(n\\) is g
 $$
 n = \sum_{1}^{h}n_i = 1 + 2 + 4 + ... + 2^{h-1}
 $$
-The number of nodes in a tree is given by a geometric progression with common ratio \\(2\\) and $h$ number of terms.    
+The number of nodes in a tree is given by a geometric progression with common ratio \\(2\\) and \\(h\\) number of terms.    
 \\(n = 2^h - 1\\)  
 Thus, \\(h = \log_2 {(n + 1)}\\). \\(\blacksquare\\) 
 
