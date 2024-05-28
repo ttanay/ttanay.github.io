@@ -6,8 +6,15 @@
     <description>Recent content in Algorithms on Tanay Tummalapalli</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 26 Apr 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 26 May 2024 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://ttanay.github.io/tags/algorithms/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Arriving at Kadane&#39;s algorithm</title>
+      <link>https://ttanay.github.io/blog/arriving-at-kadanes/</link>
+      <pubDate>Sun, 26 May 2024 00:00:00 +0000</pubDate>
+      <guid>https://ttanay.github.io/blog/arriving-at-kadanes/</guid>
+      <description>I found the explanation of Kadane&amp;rsquo;s algorithm on Wikipedia[1] too dense for a normie like me. So, I asked myself, if the algorithm were to be lost to the sands of time, how would I arrive at it naturally?&#xA;Kadane&amp;rsquo;s algorithm is a solution to the maximum subarray problem.&#xA;What is the maximum subarray problem? We take help from Wikipedia here.&#xA;In computer science, the maximum sum subarray problem, also known as the maximum segment sum problem, is the task of finding a contiguous subarray with the largest sum, within a given one-dimensional array A[1&amp;hellip;n] of numbers.</description>
+    </item>
     <item>
       <title>Proof for height of a binary tree</title>
       <link>https://ttanay.github.io/blog/binary-tree-height-proof/</link>

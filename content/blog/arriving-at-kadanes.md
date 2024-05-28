@@ -1,7 +1,6 @@
 +++
 title = "Arriving at Kadane's algorithm"
 date = "2024-05-26"
-draft = true
 
 tags = ["study", "algorithms"]
 +++
