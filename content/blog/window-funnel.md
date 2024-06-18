@@ -21,7 +21,8 @@ The dataset contains the columns:
 | `user_id`    | The unique identifier for a user                                                                   |
 | `event_name` | The name of the event performed by the user. Eg: "login", "signup", "add_to_cart", "checkout" etc. |
 | `timestamp`  | The timestamp at which the action was performed(in epoch seconds).                                 |
-Say for a given user, the event stream contains events the rows with columns `[event_name, timestamp]`:
+
+Say for a given user, the event stream contains events as rows with columns `[timestamp, event_name]`:
 ```
 [
 	[0, "landing_page"],
@@ -50,7 +51,7 @@ Let the type of an event be given by a totally-ordered finite set \\(T\\) where 
 Let \\(type\\) be a function that maps an event in the event stream to its type.
 $$type(e): E \rightarrow T$$
 Let the event stream \\(S\\) be defined as a sequence drawn from \\(E\\), such that \\(e_i \le e_j\\) where \\(i\\) and \\(j\\) are the ordinal numbers of the sequence. The binary relation \\(\le\\) on \\(E\\) is defined as:
-$$e_i \le e_j \iff (timestamp(e_i) \le timestamp(e_j) \wedge (type(e_i) \le type(e_j)))$$
+$$e_i \le e_j \iff (timestamp(e_i) \le timestamp(e_j)) \wedge (type(e_i) \le type(e_j))$$
 We are given a sequence \\(P\\) drawn from the set \\(T\\) of length \\(n\\) that defines that pattern of events that the funnel should match.
 We are given a window \\(w\\) that defines the maximum difference of the first and last timestamps of a funnel.
 
@@ -140,7 +141,7 @@ It maintains an array - `events_timestamp`, of the same size as the pattern that
 The `level` returned by the funnel is then evaluated using the index of the last non-empty value of the `events_timestamp` array.
 In the `events_timestamp` array, it only keeps track of the timestamp of the start of the window because it relies on the fact that for an event for the same index of the funnel's pattern event chain, if there is an event with a higher timestamp, a successor event will be within the window even if evaluated w.r.t to the event with a higher timestamp.
 
-The time complexity for this algorithm is \\(O(n)\\). But, since the event stream needs to be sorted by `(event_timestamp, event_type)` first, it is bounded to \\(O(\log n)\\).
+The time complexity for this algorithm is \\(O(n)\\). But, since the event stream needs to be sorted by `(event_timestamp, event_type)` first, it is bounded to \\(O(n \log n)\\).
 
 
 ## References
