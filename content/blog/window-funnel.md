@@ -1,5 +1,5 @@
 +++
-title = "Window Funnel"
+title = "How windowFunnel works in ClickHouse"
 date = "2024-06-12T13:06:55+05:30"
 
 tags = ["algorithms","clickhouse","study",]

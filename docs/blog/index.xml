@@ -9,7 +9,7 @@
     <lastBuildDate>Wed, 12 Jun 2024 13:06:55 +0530</lastBuildDate>
     <atom:link href="https://ttanay.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Window Funnel</title>
+      <title>How windowFunnel works in ClickHouse</title>
       <link>https://ttanay.github.io/blog/window-funnel/</link>
       <pubDate>Wed, 12 Jun 2024 13:06:55 +0530</pubDate>
       <guid>https://ttanay.github.io/blog/window-funnel/</guid>

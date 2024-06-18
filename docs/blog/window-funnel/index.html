@@ -5,8 +5,8 @@
   <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Window Funnel | Tanay Tummalapalli</title>
-<meta name="title" content="Window Funnel" />
+<title>How windowFunnel works in ClickHouse | Tanay Tummalapalli</title>
+<meta name="title" content="How windowFunnel works in ClickHouse" />
 <meta name="description" content="The windowFunnel function in ClickHouse has proved useful many times for me. I wondered how it actually works. I try to explain the algorithm it uses as well as why it works.
 Background Funnels[1] are a type of visualization that track how many users progress through a set of steps. They are used to model customer journeys in different contexts like product, marketing, etc. Each step is visualized as a stage of a narrowing funnel." />
 <meta name="keywords" content="algorithms,clickhouse,study," />
@@ -14,7 +14,7 @@ Background Funnels[1] are a type of visualization that track how many users prog
 
 <meta property="og:url" content="https://ttanay.github.io/blog/window-funnel/">
   <meta property="og:site_name" content="Tanay Tummalapalli">
-  <meta property="og:title" content="Window Funnel">
+  <meta property="og:title" content="How windowFunnel works in ClickHouse">
   <meta property="og:description" content="The windowFunnel function in ClickHouse has proved useful many times for me. I wondered how it actually works. I try to explain the algorithm it uses as well as why it works.
 Background Funnels[1] are a type of visualization that track how many users progress through a set of steps. They are used to model customer journeys in different contexts like product, marketing, etc. Each step is visualized as a stage of a narrowing funnel.">
   <meta property="og:locale" content="en_us">
@@ -30,14 +30,14 @@ Background Funnels[1] are a type of visualization that track how many users prog
 
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Window Funnel">
+  <meta name="twitter:title" content="How windowFunnel works in ClickHouse">
   <meta name="twitter:description" content="The windowFunnel function in ClickHouse has proved useful many times for me. I wondered how it actually works. I try to explain the algorithm it uses as well as why it works.
 Background Funnels[1] are a type of visualization that track how many users progress through a set of steps. They are used to model customer journeys in different contexts like product, marketing, etc. Each step is visualized as a stage of a narrowing funnel.">
 
 
 
 
-  <meta itemprop="name" content="Window Funnel">
+  <meta itemprop="name" content="How windowFunnel works in ClickHouse">
   <meta itemprop="description" content="The windowFunnel function in ClickHouse has proved useful many times for me. I wondered how it actually works. I try to explain the algorithm it uses as well as why it works.
 Background Funnels[1] are a type of visualization that track how many users progress through a set of steps. They are used to model customer journeys in different contexts like product, marketing, etc. Each step is visualized as a stage of a narrowing funnel.">
   <meta itemprop="datePublished" content="2024-06-12T13:06:55+05:30">
@@ -235,7 +235,7 @@ Background Funnels[1] are a type of visualization that track how many users prog
 </header>
   <main>
 
-<h1>Window Funnel</h1>
+<h1>How windowFunnel works in ClickHouse</h1>
 <p>
   <i>
     <time datetime='2024-06-12' pubdate>
