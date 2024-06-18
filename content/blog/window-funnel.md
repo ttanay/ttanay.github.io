@@ -5,7 +5,7 @@ date = "2024-06-12T13:06:55+05:30"
 tags = ["algorithms","clickhouse","study",]
 +++
 
-The `windowFunnel` function in ClickHouse has proved useful many times for me. I wondered how it actually works. I try to explain the algorithm it uses as well as why it works.
+The `windowFunnel` function in [ClickHouse](https://clickhouse.com/) has proved useful many times for me. I wondered how it actually works. I try to explain the algorithm it uses as well as why it works.
 
 
 ### Background
