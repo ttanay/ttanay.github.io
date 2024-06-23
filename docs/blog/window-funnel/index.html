@@ -42,7 +42,7 @@ Background Funnels[1] are a type of visualization that track how many users prog
 Background Funnels[1] are a type of visualization that track how many users progress through a set of steps. They are used to model customer journeys in different contexts like product, marketing, etc. Each step is visualized as a stage of a narrowing funnel.">
   <meta itemprop="datePublished" content="2024-06-12T13:06:55+05:30">
   <meta itemprop="dateModified" content="2024-06-12T13:06:55+05:30">
-  <meta itemprop="wordCount" content="1166">
+  <meta itemprop="wordCount" content="1178">
   <meta itemprop="keywords" content="Algorithms,Clickhouse,Study">
 <meta name="referrer" content="no-referrer-when-downgrade" />
 
@@ -298,7 +298,7 @@ Let \(type\) be a function that maps an event in the event stream to its type.
 </p>
 $$type(e): E \rightarrow T$$
 <p>
-Let the event stream \(S\) be defined as a sequence drawn from \(E\), such that \(e_i \le e_j\) where \(i\) and \(j\) are the ordinal numbers of the sequence. The binary relation \(\le\) on \(E\) is defined as:
+Let the event stream \(S\) be defined as a sequence drawn from \(E\), such that \( i \lt j \implies e_i \le e_j\) where \(i\) and \(j\) are the ordinal numbers of the sequence. The binary relation \(\le\) on \(E\) is defined as:
 </p>
 $$e_i \le e_j \iff (timestamp(e_i) \le timestamp(e_j)) \wedge (type(e_i) \le type(e_j))$$
 <p>
@@ -391,6 +391,7 @@ In the <code>events_timestamp</code> array, it only keeps track of the timestamp
 <li><a href="https://clickhouse.com/docs/en/sql-reference/aggregate-functions/parametric-functions#windowfunnel">https://clickhouse.com/docs/en/sql-reference/aggregate-functions/parametric-functions#windowfunnel</a></li>
 <li><a href="https://github.com/ClickHouse/ClickHouse/blob/abb88e4d607fb927e2d444a3f5b1928d5dc0b962/src/AggregateFunctions/AggregateFunctionWindowFunnel.cpp">https://github.com/ClickHouse/ClickHouse/blob/abb88e4d607fb927e2d444a3f5b1928d5dc0b962/src/AggregateFunctions/AggregateFunctionWindowFunnel.cpp</a></li>
 </ol>
+<p>Thanks to Tushar and Srikanth for review!</p>
 
 </content>
 <p>

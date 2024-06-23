@@ -50,7 +50,7 @@ $$timestamp(e): E \rightarrow \mathbb{Z}^{+}$$
 Let the type of an event be given by a totally-ordered finite set \\(T\\) where \\(T \subset \mathbb{Z}^{+}\\)
 Let \\(type\\) be a function that maps an event in the event stream to its type.
 $$type(e): E \rightarrow T$$
-Let the event stream \\(S\\) be defined as a sequence drawn from \\(E\\), such that \\(e_i \le e_j\\) where \\(i\\) and \\(j\\) are the ordinal numbers of the sequence. The binary relation \\(\le\\) on \\(E\\) is defined as:
+Let the event stream \\(S\\) be defined as a sequence drawn from \\(E\\), such that \\( i \lt j \implies e_i \le e_j\\) where \\(i\\) and \\(j\\) are the ordinal numbers of the sequence. The binary relation \\(\le\\) on \\(E\\) is defined as:
 $$e_i \le e_j \iff (timestamp(e_i) \le timestamp(e_j)) \wedge (type(e_i) \le type(e_j))$$
 We are given a sequence \\(P\\) drawn from the set \\(T\\) of length \\(n\\) that defines that pattern of events that the funnel should match.
 We are given a window \\(w\\) that defines the maximum difference of the first and last timestamps of a funnel.
@@ -148,3 +148,5 @@ The time complexity for this algorithm is \\(O(n)\\). But, since the event strea
 1. https://en.wikipedia.org/wiki/Funnel_analysis
 2. https://clickhouse.com/docs/en/sql-reference/aggregate-functions/parametric-functions#windowfunnel
 3. https://github.com/ClickHouse/ClickHouse/blob/abb88e4d607fb927e2d444a3f5b1928d5dc0b962/src/AggregateFunctions/AggregateFunctionWindowFunnel.cpp
+
+Thanks to Tushar and Srikanth for review! 
