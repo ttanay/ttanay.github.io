@@ -148,5 +148,6 @@ The time complexity for this algorithm is \\(O(n)\\). But, since the event strea
 1. https://en.wikipedia.org/wiki/Funnel_analysis
 2. https://clickhouse.com/docs/en/sql-reference/aggregate-functions/parametric-functions#windowfunnel
 3. https://github.com/ClickHouse/ClickHouse/blob/abb88e4d607fb927e2d444a3f5b1928d5dc0b962/src/AggregateFunctions/AggregateFunctionWindowFunnel.cpp
+4. https://www.jianshu.com/p/4c86a2478cca
 
 Thanks to Tushar and Srikanth for review! 
