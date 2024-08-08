@@ -1,40 +1,310 @@
-<!doctype html><html lang=en-us><head><meta http-equiv=X-Clacks-Overhead content="GNU Terry Pratchett"><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Query Processing In Clickhouse | Tanay Tummalapalli</title>
-<meta name=title content="Query Processing In Clickhouse"><meta name=description content="ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Query Processing In Clickhouse | Tanay Tummalapalli</title>
+<meta name="title" content="Query Processing In Clickhouse" />
+<meta name="description" content="ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.
 This post is latest as on 835afe1f342.
-Introduction ClickHouse is a columnar, vectorized OLAP database written in C++. We will take an example read query, and look at how the query is processed."><meta name=keywords content="clickhouse,study,"><meta property="og:url" content="https://ttanay.github.io/blog/query-processing-in-clickhouse/"><meta property="og:site_name" content="Tanay Tummalapalli"><meta property="og:title" content="Query Processing In Clickhouse"><meta property="og:description" content="ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.
+Introduction ClickHouse is a columnar, vectorized OLAP database written in C&#43;&#43;. We will take an example read query, and look at how the query is processed." />
+<meta name="keywords" content="clickhouse,study," />
+
+
+<meta property="og:url" content="https://ttanay.github.io/blog/query-processing-in-clickhouse/">
+  <meta property="og:site_name" content="Tanay Tummalapalli">
+  <meta property="og:title" content="Query Processing In Clickhouse">
+  <meta property="og:description" content="ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.
 This post is latest as on 835afe1f342.
-Introduction ClickHouse is a columnar, vectorized OLAP database written in C++. We will take an example read query, and look at how the query is processed."><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="blog"><meta property="article:published_time" content="2024-03-24T00:00:00+00:00"><meta property="article:modified_time" content="2024-03-24T00:00:00+00:00"><meta property="article:tag" content="Clickhouse"><meta property="article:tag" content="Study"><meta name=twitter:card content="summary"><meta name=twitter:title content="Query Processing In Clickhouse"><meta name=twitter:description content="ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.
+Introduction ClickHouse is a columnar, vectorized OLAP database written in C&#43;&#43;. We will take an example read query, and look at how the query is processed.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blog">
+    <meta property="article:published_time" content="2024-03-24T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-03-24T00:00:00+00:00">
+    <meta property="article:tag" content="Clickhouse">
+    <meta property="article:tag" content="Study">
+
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Query Processing In Clickhouse">
+  <meta name="twitter:description" content="ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.
 This post is latest as on 835afe1f342.
-Introduction ClickHouse is a columnar, vectorized OLAP database written in C++. We will take an example read query, and look at how the query is processed."><meta itemprop=name content="Query Processing In Clickhouse"><meta itemprop=description content="ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.
+Introduction ClickHouse is a columnar, vectorized OLAP database written in C&#43;&#43;. We will take an example read query, and look at how the query is processed.">
+
+
+
+
+  <meta itemprop="name" content="Query Processing In Clickhouse">
+  <meta itemprop="description" content="ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.
 This post is latest as on 835afe1f342.
-Introduction ClickHouse is a columnar, vectorized OLAP database written in C++. We will take an example read query, and look at how the query is processed."><meta itemprop=datePublished content="2024-03-24T00:00:00+00:00"><meta itemprop=dateModified content="2024-03-24T00:00:00+00:00"><meta itemprop=wordCount content="972"><meta itemprop=keywords content="Clickhouse,Study"><meta name=referrer content="no-referrer-when-downgrade"><style>body{font-family:Verdana,sans-serif;margin:auto;padding:20px;max-width:720px;text-align:left;background-color:#fff;word-wrap:break-word;overflow-wrap:break-word;line-height:1.5;color:#444}h1,h2,h3,h4,h5,h6,strong,b{color:#222}a{color:#3273dc}.title{text-decoration:none;border:0}.title span{font-weight:400}nav a{margin-right:10px}textarea{width:100%;font-size:16px}input{font-size:16px}content{line-height:1.6}table{width:100%}img{max-width:100%}code{padding:2px 5px;background-color:#f2f2f2}pre code{color:#222;display:block;padding:20px;white-space:pre-wrap;font-size:14px;overflow-x:auto}div.highlight pre{background-color:initial;color:initial}div.highlight code{background-color:unset;color:unset}blockquote{border-left:1px solid #999;color:#222;padding-left:20px;font-style:italic}footer{padding:25px;text-align:center}.helptext{color:#777;font-size:small}.errorlist{color:#eba613;font-size:small}ul.blog-posts{list-style-type:none;padding:unset}ul.blog-posts li{display:flex}ul.blog-posts li span{flex:0 0 130px}ul.blog-posts li a:visited{color:#8b6fcb}@media(prefers-color-scheme:dark){body{background-color:#333;color:#ddd}h1,h2,h3,h4,h5,h6,strong,b{color:#eee}a{color:#8cc2dd}code{background-color:#777}pre code{color:#ddd}blockquote{color:#ccc}textarea,input{background-color:#252525;color:#ddd}.helptext{color:#aaa}}</style></head><body><header><a href=/ class=title><h2>Tanay Tummalapalli</h2></a><nav><a href=/>Home</a>
-<a href=/blog>Blog</a></nav></header><main><h1>Query Processing In Clickhouse</h1><p><i><time datetime=2024-03-24 pubdate>24 Mar, 2024</time></i></p><content><p>ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints.
-This is my attempt to best summarize my understanding of it.</p><p>This post is latest as on <a href=https://github.com/ClickHouse/ClickHouse/commit/835afe1f342>835afe1f342</a>.</p><h2 id=introduction>Introduction</h2><p>ClickHouse is a columnar, vectorized OLAP database written in C++.
-We will take an example read query, and look at how the query is processed.</p><p>Consider this SQL as the example query:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- Schema
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> purchases
-</span></span><span style=display:flex><span>(
-</span></span><span style=display:flex><span>    <span style=color:#f92672>`</span>dt<span style=color:#f92672>`</span> DateTime,
-</span></span><span style=display:flex><span>    <span style=color:#f92672>`</span>customer_id<span style=color:#f92672>`</span> UInt32,
-</span></span><span style=display:flex><span>    <span style=color:#f92672>`</span>total_spent<span style=color:#f92672>`</span> Float32
-</span></span><span style=display:flex><span>)
-</span></span><span style=display:flex><span>ENGINE <span style=color:#f92672>=</span> MergeTree
-</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> dt;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- Read Query
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span><span style=color:#66d9ef>SELECT</span>
-</span></span><span style=display:flex><span>    floor(total_spent) <span style=color:#66d9ef>AS</span> s,
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>count</span>(<span style=color:#f92672>*</span>) <span style=color:#66d9ef>AS</span> n,
-</span></span><span style=display:flex><span>    bar(n, <span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>350000</span>, <span style=color:#ae81ff>50</span>)
-</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> purchases
-</span></span><span style=display:flex><span><span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> s
-</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> s <span style=color:#66d9ef>ASC</span>
-</span></span></code></pre></div><p><img src=/query_processing_clickhouse_overview.png alt=overview></p><p>When we run the SELECT query, at a high-level the following happens:</p><ol><li>The ClickHouse server receives the query and calls <a href=https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Interpreters/executeQuery.h#L66-L71><code>executeQuery</code></a> which executes the query.</li><li>The query string is parsed by the ClickHouse Parser to create an Abstract Syntax Tree(AST) representation of the query.</li><li>An Interpreter is created to interpret this AST by doing the following:<ol><li>Creates a logical query plan by rewriting the AST for binding symbols with objects from the catalog, applying settings, and making logical query optimizations.</li><li>Creates the physical query plan by applying optimizations to the logical query plan.</li></ol></li><li>An execution graph is created from this physical query plan.</li><li>An executor executes the execution graph in multiple threads(depending on the settings).</li></ol><p>Query processing can be broken down broadly into the following stages:</p><ol><li>Parser</li><li>Building Query Plan</li><li>Building Query Pipeline</li><li>Executing the query.</li></ol><p>Let&rsquo;s look at the data structures used. We will then see how their are built in future posts.</p><h2 id=ast>AST</h2><p>The AST data structure is a tree.
-Each type of AST subclasses <a href=https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Parsers/IAST.h><code>IAST</code></a> and describes data specific to the grammar. Eg: <a href=https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Parsers/ASTSelectQuery.h><code>ASTSelectQuery</code></a> for a Select Query.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>IAST</span> <span style=color:#f92672>:</span> <span style=color:#66d9ef>public</span> std<span style=color:#f92672>::</span>enabled_shared_from_this<span style=color:#f92672>&lt;</span>IAST<span style=color:#f92672>&gt;</span> , <span style=color:#66d9ef>public</span> TypePromotion<span style=color:#f92672>&lt;</span>IAST<span style=color:#f92672>&gt;</span> 
-</span></span><span style=display:flex><span>{
-</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>    ASTs children; 
-</span></span><span style=display:flex><span>};
-</span></span></code></pre></div><p>The AST for our query looks something like:</p><pre tabindex=0><code>┌─explain─────────────────────────────────────┐
+Introduction ClickHouse is a columnar, vectorized OLAP database written in C&#43;&#43;. We will take an example read query, and look at how the query is processed.">
+  <meta itemprop="datePublished" content="2024-03-24T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2024-03-24T00:00:00+00:00">
+  <meta itemprop="wordCount" content="972">
+  <meta itemprop="keywords" content="Clickhouse,Study">
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  body {
+    font-family: Verdana, sans-serif;
+    margin: auto;
+    padding: 20px;
+    max-width: 720px;
+    text-align: left;
+    background-color: #fff;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: #444;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  strong,
+  b {
+    color: #222;
+  }
+
+  a {
+    color: #3273dc;
+     
+  }
+
+  .title {
+    text-decoration: none;
+    border: 0;
+  }
+
+  .title span {
+    font-weight: 400;
+  }
+
+  nav a {
+    margin-right: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  input {
+    font-size: 16px;
+  }
+
+  content {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    padding: 2px 5px;
+    background-color: #f2f2f2;
+  }
+
+  pre code {
+    color: #222;
+    display: block;
+    padding: 20px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    overflow-x: auto;
+  }
+
+  div.highlight pre {
+    background-color: initial;
+    color: initial;
+  }
+
+  div.highlight code {
+    background-color: unset;
+    color: unset;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: #222;
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 25px;
+    text-align: center;
+  }
+
+  .helptext {
+    color: #777;
+    font-size: small;
+  }
+
+  .errorlist {
+    color: #eba613;
+    font-size: small;
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: #8b6fcb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #333;
+      color: #ddd;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    b {
+      color: #eee;
+    }
+
+    a {
+      color: #8cc2dd;
+    }
+
+    code {
+      background-color: #777;
+    }
+
+    pre code {
+      color: #ddd;
+    }
+
+    blockquote {
+      color: #ccc;
+    }
+
+    textarea,
+    input {
+      background-color: #252525;
+      color: #ddd;
+    }
+
+    .helptext {
+      color: #aaa;
+    }
+  }
+
+</style>
+
+</head>
+
+<body>
+  <header><a href="/" class="title">
+  <h2>Tanay Tummalapalli</h2>
+</a>
+<nav><a href="/">Home</a>
+
+
+<a href="/blog">Blog</a>
+
+</nav>
+</header>
+  <main>
+
+<h1>Query Processing In Clickhouse</h1>
+<p>
+  <i>
+    <time datetime='2024-03-24' pubdate>
+      24 Mar, 2024
+    </time>
+  </i>
+</p>
+
+<content>
+  <p>ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints.
+This is my attempt to best summarize my understanding of it.</p>
+<p>This post is latest as on <a href="https://github.com/ClickHouse/ClickHouse/commit/835afe1f342">835afe1f342</a>.</p>
+<h2 id="introduction">Introduction</h2>
+<p>ClickHouse is a columnar, vectorized OLAP database written in C++.
+We will take an example read query, and look at how the query is processed.</p>
+<p>Consider this SQL as the example query:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- Schema
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> purchases
+</span></span><span style="display:flex;"><span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">`</span>dt<span style="color:#f92672">`</span> DateTime,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">`</span>customer_id<span style="color:#f92672">`</span> UInt32,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">`</span>total_spent<span style="color:#f92672">`</span> Float32
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>ENGINE <span style="color:#f92672">=</span> MergeTree
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> dt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Read Query
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    floor(total_spent) <span style="color:#66d9ef">AS</span> s,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">count</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">AS</span> n,
+</span></span><span style="display:flex;"><span>    bar(n, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">350000</span>, <span style="color:#ae81ff">50</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> purchases
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> s
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> s <span style="color:#66d9ef">ASC</span>
+</span></span></code></pre></div><p><img src="/query_processing_clickhouse_overview.png" alt="overview"></p>
+<p>When we run the SELECT query, at a high-level the following happens:</p>
+<ol>
+<li>The ClickHouse server receives the query and calls <a href="https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Interpreters/executeQuery.h#L66-L71"><code>executeQuery</code></a> which executes the query.</li>
+<li>The query string is parsed by the ClickHouse Parser to create an Abstract Syntax Tree(AST) representation of the query.</li>
+<li>An Interpreter is created to interpret this AST by doing the following:
+<ol>
+<li>Creates a logical query plan by rewriting the AST for binding symbols with objects from the catalog, applying settings, and making logical query optimizations.</li>
+<li>Creates the physical query plan by applying optimizations to the logical query plan.</li>
+</ol>
+</li>
+<li>An execution graph is created from this physical query plan.</li>
+<li>An executor executes the execution graph in multiple threads(depending on the settings).</li>
+</ol>
+<p>Query processing can be broken down broadly into the following stages:</p>
+<ol>
+<li>Parser</li>
+<li>Building Query Plan</li>
+<li>Building Query Pipeline</li>
+<li>Executing the query.</li>
+</ol>
+<p>Let&rsquo;s look at the data structures used. We will then see how their are built in future posts.</p>
+<h2 id="ast">AST</h2>
+<p>The AST data structure is a tree.
+Each type of AST subclasses <a href="https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Parsers/IAST.h"><code>IAST</code></a> and describes data specific to the grammar. Eg: <a href="https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Parsers/ASTSelectQuery.h"><code>ASTSelectQuery</code></a> for a Select Query.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">IAST</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> std<span style="color:#f92672">::</span>enabled_shared_from_this<span style="color:#f92672">&lt;</span>IAST<span style="color:#f92672">&gt;</span> , <span style="color:#66d9ef">public</span> TypePromotion<span style="color:#f92672">&lt;</span>IAST<span style="color:#f92672">&gt;</span> 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    ASTs children; 
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>The AST for our query looks something like:</p>
+<pre tabindex="0"><code>┌─explain─────────────────────────────────────┐
 │ SelectWithUnionQuery (children 1)           │
 │  ExpressionList (children 1)                │
 │   SelectQuery (children 4)                  │
@@ -61,33 +331,43 @@ Each type of AST subclasses <a href=https://github.com/ClickHouse/ClickHouse/blo
 │     OrderByElement (children 1)             │
 │      Identifier s                           │
 └─────────────────────────────────────────────┘
-</code></pre><h2 id=logical-query-plan>Logical Query Plan</h2><p>The logical query plan is built by performing the following:</p><ol><li>Rewriting the AST by applying logical query optimizations. Eg: Predicate Pushdown, Constant Folding, etc.</li><li>Applying AST-level settings like <a href=https://clickhouse.com/docs/en/operations/settings/settings#count_distinct_implementation><code>count_distinct_implementation</code></a>.</li><li>Binding all symbols/identifiers to their corresponding objects from the database catalog.</li></ol><p>The logical query plan - <a href=https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Processors/QueryPlan/QueryPlan.h><code>QueryPlan</code></a> is a tree with each node being a <a href=https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Processors/QueryPlan/IQueryPlanStep.h><code>IQueryPlanStep</code></a>. Each clause is in the query plan is an object of <code>IQueryPlanStep</code>. Eg: <a href=https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Processors/QueryPlan/JoinStep.h><code>JoinStep</code></a>,<a href=https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Processors/QueryPlan/SortingStep.h><code>SortingStep</code></a>.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>QueryPlan</span> 
-</span></span><span style=display:flex><span>{
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>Node</span>
-</span></span><span style=display:flex><span>    {
-</span></span><span style=display:flex><span>        QueryPlanStepPtr step; 
-</span></span><span style=display:flex><span>        std<span style=color:#f92672>::</span>vector<span style=color:#f92672>&lt;</span>Node <span style=color:#f92672>*&gt;</span> children <span style=color:#f92672>=</span> {};
-</span></span><span style=display:flex><span>    };
-</span></span><span style=display:flex><span>    <span style=color:#75715e>// Optimizes the logical query plan
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>optimize</span>(<span style=color:#66d9ef>const</span> QueryPlanOptimizationSettings <span style=color:#f92672>&amp;</span> optimization_settings); 
-</span></span><span style=display:flex><span>    <span style=color:#75715e>// Builds the physical query plan 
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    QueryPipelineBuilderPtr <span style=color:#a6e22e>buildQueryPipeline</span>(
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>const</span> QueryPlanOptimizationSettings <span style=color:#f92672>&amp;</span> optimization_settings,
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>const</span> BuildQueryPipelineSettings <span style=color:#f92672>&amp;</span> build_pipeline_settings);
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>The nodes in the query plan are also connected with data streams.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#75715e>// Logical data stream containing description of the stream
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>DataStream</span> {};
-</span></span><span style=display:flex><span><span style=color:#66d9ef>using</span> DataStreams <span style=color:#f92672>=</span> std<span style=color:#f92672>::</span>vector<span style=color:#f92672>&lt;</span>DataStream<span style=color:#f92672>&gt;</span>; 
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>IQueryPlanStep</span>
-</span></span><span style=display:flex><span>{
-</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e>/// Add processors from current step to QueryPipeline.
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#66d9ef>virtual</span> QueryPipelineBuilderPtr updatePipeline(QueryPipelineBuilders pipelines, <span style=color:#66d9ef>const</span> BuildQueryPipelineSettings <span style=color:#f92672>&amp;</span> settings) <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>protected</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>    DataStreams input_streams; 
-</span></span><span style=display:flex><span>    std<span style=color:#f92672>::</span>optional<span style=color:#f92672>&lt;</span>DataStream<span style=color:#f92672>&gt;</span> output_stream;
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>The logical query plan for our query looks something like this:</p><pre tabindex=0><code>┌─explain──────────────────────────────────────────────────────┐
+</code></pre><h2 id="logical-query-plan">Logical Query Plan</h2>
+<p>The logical query plan is built by performing the following:</p>
+<ol>
+<li>Rewriting the AST by applying logical query optimizations. Eg: Predicate Pushdown, Constant Folding, etc.</li>
+<li>Applying AST-level settings like <a href="https://clickhouse.com/docs/en/operations/settings/settings#count_distinct_implementation"><code>count_distinct_implementation</code></a>.</li>
+<li>Binding all symbols/identifiers to their corresponding objects from the database catalog.</li>
+</ol>
+<p>The logical query plan - <a href="https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Processors/QueryPlan/QueryPlan.h"><code>QueryPlan</code></a> is a tree with each node being a <a href="https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Processors/QueryPlan/IQueryPlanStep.h"><code>IQueryPlanStep</code></a>. Each clause is in the query plan is an object of <code>IQueryPlanStep</code>. Eg: <a href="https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Processors/QueryPlan/JoinStep.h"><code>JoinStep</code></a>,<a href="https://github.com/ClickHouse/ClickHouse/blob/835afe1f342ebbb42a39d55d19a4f95df2691978/src/Processors/QueryPlan/SortingStep.h"><code>SortingStep</code></a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">QueryPlan</span> 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Node</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        QueryPlanStepPtr step; 
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>Node <span style="color:#f92672">*&gt;</span> children <span style="color:#f92672">=</span> {};
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Optimizes the logical query plan
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">optimize</span>(<span style="color:#66d9ef">const</span> QueryPlanOptimizationSettings <span style="color:#f92672">&amp;</span> optimization_settings); 
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Builds the physical query plan 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    QueryPipelineBuilderPtr <span style="color:#a6e22e">buildQueryPipeline</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> QueryPlanOptimizationSettings <span style="color:#f92672">&amp;</span> optimization_settings,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> BuildQueryPipelineSettings <span style="color:#f92672">&amp;</span> build_pipeline_settings);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The nodes in the query plan are also connected with data streams.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// Logical data stream containing description of the stream
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DataStream</span> {};
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> DataStreams <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>DataStream<span style="color:#f92672">&gt;</span>; 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">IQueryPlanStep</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/// Add processors from current step to QueryPipeline.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">virtual</span> QueryPipelineBuilderPtr updatePipeline(QueryPipelineBuilders pipelines, <span style="color:#66d9ef">const</span> BuildQueryPipelineSettings <span style="color:#f92672">&amp;</span> settings) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">protected</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    DataStreams input_streams; 
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>optional<span style="color:#f92672">&lt;</span>DataStream<span style="color:#f92672">&gt;</span> output_stream;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The logical query plan for our query looks something like this:</p>
+<pre tabindex="0"><code>┌─explain──────────────────────────────────────────────────────┐
 │ Expression ((Projection + Before ORDER BY [lifted up part])) │
 │   Sorting (Sorting for ORDER BY)                             │
 │     Expression (Before ORDER BY)                             │
@@ -95,41 +375,45 @@ Each type of AST subclasses <a href=https://github.com/ClickHouse/ClickHouse/blo
 │         Expression (Before GROUP BY)                         │
 │           ReadFromPreparedSource (Read from NullSource)      │
 └──────────────────────────────────────────────────────────────┘
-</code></pre><h2 id=physical-query-plan>Physical Query Plan</h2><p>The physical query plan is called Query Pipeline in ClickHouse.
+</code></pre><h2 id="physical-query-plan">Physical Query Plan</h2>
+<p>The physical query plan is called Query Pipeline in ClickHouse.
 To translate the logical query plan into a Query Pipeline, <code>QueryPlan::buildQueryPipeline</code> is called.
 This performs optimizations on the logical query plan.
-After optimizations are done, each step is translated into one or more sets of processors using <code>IQueryPlanStep::updatePipeline</code> in an inorder traversal of the tree.</p><p>The query pipeline is a tree with each node being a <code>IProcessor</code>. Each processor represents a stage in the query execution. They are closely linked to the actual execution. Eg: Depending on the specifics, <code>SortingStep</code> is transformed to <code>PartialSortingTransform</code>, <code>MergeSortedTransform</code> and <code>MergeSortingTransform</code> in the query pipeline.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>QueryPipeline</span> {
-</span></span><span style=display:flex><span><span style=color:#66d9ef>private</span><span style=color:#f92672>:</span> 
-</span></span><span style=display:flex><span>    std<span style=color:#f92672>::</span>shared_ptr<span style=color:#f92672>&lt;</span>Processors<span style=color:#f92672>&gt;</span> processors;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    InputPort <span style=color:#f92672>*</span> input <span style=color:#f92672>=</span> <span style=color:#66d9ef>nullptr</span>; 
-</span></span><span style=display:flex><span>    OutputPort <span style=color:#f92672>*</span> output <span style=color:#f92672>=</span> <span style=color:#66d9ef>nullptr</span>; 
-</span></span><span style=display:flex><span>}; 
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>IProcessor</span>
-</span></span><span style=display:flex><span>{
-</span></span><span style=display:flex><span><span style=color:#66d9ef>protected</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>    InputPorts inputs; 
-</span></span><span style=display:flex><span>    OutputPorts outputs; 
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>enum</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Status</span> 
-</span></span><span style=display:flex><span>    {
-</span></span><span style=display:flex><span>        NeedData,
-</span></span><span style=display:flex><span>        PortFull, 
-</span></span><span style=display:flex><span>        Finished, 
-</span></span><span style=display:flex><span>        Ready, 
-</span></span><span style=display:flex><span>        Async, 
-</span></span><span style=display:flex><span>        ExpandPipeline,
-</span></span><span style=display:flex><span>    };
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>virtual</span> Status <span style=color:#a6e22e>prepare</span>(<span style=color:#66d9ef>const</span> PortNumbers <span style=color:#f92672>&amp;</span> updated_input_ports, <span style=color:#66d9ef>const</span> PortNumbers <span style=color:#f92672>&amp;</span> updated_output_ports);
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>virtual</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>work</span>(); 
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>virtual</span> <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>schedule</span>(); 
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>virtual</span> Processors <span style=color:#a6e22e>expandPipeline</span>(); 
-</span></span><span style=display:flex><span>}
+After optimizations are done, each step is translated into one or more sets of processors using <code>IQueryPlanStep::updatePipeline</code> in an inorder traversal of the tree.</p>
+<p>The query pipeline is a tree with each node being a <code>IProcessor</code>. Each processor represents a stage in the query execution. They are closely linked to the actual execution. Eg: Depending on the specifics, <code>SortingStep</code> is transformed to <code>PartialSortingTransform</code>, <code>MergeSortedTransform</code> and <code>MergeSortingTransform</code> in the query pipeline.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">QueryPipeline</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span> 
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>shared_ptr<span style="color:#f92672">&lt;</span>Processors<span style="color:#f92672">&gt;</span> processors;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    InputPort <span style="color:#f92672">*</span> input <span style="color:#f92672">=</span> <span style="color:#66d9ef">nullptr</span>; 
+</span></span><span style="display:flex;"><span>    OutputPort <span style="color:#f92672">*</span> output <span style="color:#f92672">=</span> <span style="color:#66d9ef">nullptr</span>; 
+</span></span><span style="display:flex;"><span>}; 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">IProcessor</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">protected</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    InputPorts inputs; 
+</span></span><span style="display:flex;"><span>    OutputPorts outputs; 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">enum</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Status</span> 
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        NeedData,
+</span></span><span style="display:flex;"><span>        PortFull, 
+</span></span><span style="display:flex;"><span>        Finished, 
+</span></span><span style="display:flex;"><span>        Ready, 
+</span></span><span style="display:flex;"><span>        Async, 
+</span></span><span style="display:flex;"><span>        ExpandPipeline,
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> Status <span style="color:#a6e22e">prepare</span>(<span style="color:#66d9ef">const</span> PortNumbers <span style="color:#f92672">&amp;</span> updated_input_ports, <span style="color:#66d9ef">const</span> PortNumbers <span style="color:#f92672">&amp;</span> updated_output_ports);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">work</span>(); 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">schedule</span>(); 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> Processors <span style="color:#a6e22e">expandPipeline</span>(); 
+</span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><code>IProcessor::Status</code> is used to signal whether data should be pushed to a processors&rsquo; port or not. This is used while executing the query. We will look at this in detail in a future post about the query execution.
-The query pipeline for our query looks something like:</p><pre tabindex=0><code>┌─explain────────────────────────────────────┐
+The query pipeline for our query looks something like:</p>
+<pre tabindex="0"><code>┌─explain────────────────────────────────────┐
 │ (Expression)                               │
 │ ExpressionTransform                        │
 │   (Sorting)                                │
@@ -147,5 +431,30 @@ The query pipeline for our query looks something like:</p><pre tabindex=0><code>
 │                   (ReadFromPreparedSource) │
 │                   NullSource 0 _ 1         │
 └────────────────────────────────────────────┘
-</code></pre><p>Now that we have looked at the data structures involved in query processing, we will look at how these data structures are built and used in the next post.</p></content><p><a href=https://ttanay.github.io/tags/clickhouse/>#Clickhouse</a>
-<a href=https://ttanay.github.io/tags/study/>#Study</a></p></main><footer></footer><script id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js></script><script>MathJax={tex:{displayMath:[["\\[","\\]"],["$$","$$"]],inlineMath:[["\\(","\\)"]]}}</script></body></html>
+</code></pre><p>Now that we have looked at the data structures involved in query processing, we will look at how these data structures are built and used in the next post.</p>
+
+</content>
+<p>
+  
+  <a href="https://ttanay.github.io/tags/clickhouse/">#Clickhouse</a>
+  
+  <a href="https://ttanay.github.io/tags/study/">#Study</a>
+  
+</p>
+
+  </main>
+  <footer>
+</footer>
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>
+</body>
+
+</html>
