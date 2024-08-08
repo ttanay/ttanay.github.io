@@ -1,19 +1,2 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Kubernetes on Tanay Tummalapalli</title>
-    <link>https://ttanay.github.io/tags/kubernetes/</link>
-    <description>Recent content in Kubernetes on Tanay Tummalapalli</description>
-    <generator>Hugo</generator>
-    <language>en-us</language>
-    <lastBuildDate>Tue, 06 Aug 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://ttanay.github.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>K8s Vertical Pod Autoscaler&#39;s Algorithm</title>
-      <link>https://ttanay.github.io/blog/vpa-algorithm/</link>
-      <pubDate>Tue, 06 Aug 2024 00:00:00 +0000</pubDate>
-      <guid>https://ttanay.github.io/blog/vpa-algorithm/</guid>
-      <description>I tried to understand how the Vertical Pod Autoscaler(VPA) works and found a comment[1] by this gentleman(@yashbutwala) explaining in brief how it works:&#xA;recommendations are calculated using decaying histogram of weighted samples from the metrics server, where the newer samples are assigned higher weights; older samples are decaying and hence affect less and less w.r.t. to the recommendations. CPU is calculated using the 90th percentile of all cpu samples, and memory is calculated using the 90th percentile peak over the 8 day window</description>
-    </item>
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kubernetes on Tanay Tummalapalli</title><link>https://ttanay.github.io/tags/kubernetes/</link><description>Recent content in Kubernetes on Tanay Tummalapalli</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Tue, 06 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://ttanay.github.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml"/><item><title>K8s Vertical Pod Autoscaler's Algorithm</title><link>https://ttanay.github.io/blog/vpa-algorithm/</link><pubDate>Tue, 06 Aug 2024 00:00:00 +0000</pubDate><guid>https://ttanay.github.io/blog/vpa-algorithm/</guid><description>I tried to understand how the Vertical Pod Autoscaler(VPA) works and found a comment[1] by this gentleman(@yashbutwala) explaining in brief how it works:
+recommendations are calculated using decaying histogram of weighted samples from the metrics server, where the newer samples are assigned higher weights; older samples are decaying and hence affect less and less w.r.t. to the recommendations. CPU is calculated using the 90th percentile of all cpu samples, and memory is calculated using the 90th percentile peak over the 8 day window</description></item></channel></rss>

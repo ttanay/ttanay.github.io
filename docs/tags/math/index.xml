@@ -1,19 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Math on Tanay Tummalapalli</title>
-    <link>https://ttanay.github.io/tags/math/</link>
-    <description>Recent content in Math on Tanay Tummalapalli</description>
-    <generator>Hugo</generator>
-    <language>en-us</language>
-    <lastBuildDate>Fri, 26 Apr 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://ttanay.github.io/tags/math/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Proof for height of a binary tree</title>
-      <link>https://ttanay.github.io/blog/binary-tree-height-proof/</link>
-      <pubDate>Fri, 26 Apr 2024 00:00:00 +0000</pubDate>
-      <guid>https://ttanay.github.io/blog/binary-tree-height-proof/</guid>
-      <description>I keep forgetting the standard result of the height of a binary tree. I figured, writing out the proof on my own might help me remember the result.&#xA;We assume that the tree is a full binary tree for simplicity. A full binary tree is defined as follows[1]:&#xA;A binary tree in which each node has exactly zero or two children.&#xA;A binary tree starts with the root node at level one(we consider levels to be 1-indexed).</description>
-    </item>
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Math on Tanay Tummalapalli</title><link>https://ttanay.github.io/tags/math/</link><description>Recent content in Math on Tanay Tummalapalli</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Fri, 26 Apr 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://ttanay.github.io/tags/math/index.xml" rel="self" type="application/rss+xml"/><item><title>Proof for height of a binary tree</title><link>https://ttanay.github.io/blog/binary-tree-height-proof/</link><pubDate>Fri, 26 Apr 2024 00:00:00 +0000</pubDate><guid>https://ttanay.github.io/blog/binary-tree-height-proof/</guid><description>I keep forgetting the standard result of the height of a binary tree. I figured, writing out the proof on my own might help me remember the result.
+We assume that the tree is a full binary tree for simplicity. A full binary tree is defined as follows[1]:
+A binary tree in which each node has exactly zero or two children.
+A binary tree starts with the root node at level one(we consider levels to be 1-indexed).</description></item></channel></rss>

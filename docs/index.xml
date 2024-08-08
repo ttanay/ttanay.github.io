@@ -1,47 +1,11 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>About Me on Tanay Tummalapalli</title>
-    <link>https://ttanay.github.io/</link>
-    <description>Recent content in About Me on Tanay Tummalapalli</description>
-    <generator>Hugo</generator>
-    <language>en-us</language>
-    <lastBuildDate>Tue, 06 Aug 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://ttanay.github.io/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>K8s Vertical Pod Autoscaler&#39;s Algorithm</title>
-      <link>https://ttanay.github.io/blog/vpa-algorithm/</link>
-      <pubDate>Tue, 06 Aug 2024 00:00:00 +0000</pubDate>
-      <guid>https://ttanay.github.io/blog/vpa-algorithm/</guid>
-      <description>I tried to understand how the Vertical Pod Autoscaler(VPA) works and found a comment[1] by this gentleman(@yashbutwala) explaining in brief how it works:&#xA;recommendations are calculated using decaying histogram of weighted samples from the metrics server, where the newer samples are assigned higher weights; older samples are decaying and hence affect less and less w.r.t. to the recommendations. CPU is calculated using the 90th percentile of all cpu samples, and memory is calculated using the 90th percentile peak over the 8 day window</description>
-    </item>
-    <item>
-      <title>How windowFunnel works in ClickHouse</title>
-      <link>https://ttanay.github.io/blog/window-funnel/</link>
-      <pubDate>Wed, 12 Jun 2024 13:06:55 +0530</pubDate>
-      <guid>https://ttanay.github.io/blog/window-funnel/</guid>
-      <description>The windowFunnel function in ClickHouse has proved useful many times for me. I wondered how it actually works. I try to explain the algorithm it uses as well as why it works.&#xA;Background Funnels[1] are a type of visualization that track how many users progress through a set of steps. They are used to model customer journeys in different contexts like product, marketing, etc. Each step is visualized as a stage of a narrowing funnel.</description>
-    </item>
-    <item>
-      <title>Arriving at Kadane&#39;s algorithm</title>
-      <link>https://ttanay.github.io/blog/arriving-at-kadanes/</link>
-      <pubDate>Sun, 26 May 2024 00:00:00 +0000</pubDate>
-      <guid>https://ttanay.github.io/blog/arriving-at-kadanes/</guid>
-      <description>I found the explanation of Kadane&amp;rsquo;s algorithm on Wikipedia[1] too dense for a normie like me. So, I asked myself, if the algorithm were to be lost to the sands of time, how would I arrive at it naturally?&#xA;Kadane&amp;rsquo;s algorithm is a solution to the maximum subarray problem.&#xA;What is the maximum subarray problem? We take help from Wikipedia here.&#xA;In computer science, the maximum sum subarray problem, also known as the maximum segment sum problem, is the task of finding a contiguous subarray with the largest sum, within a given one-dimensional array A[1&amp;hellip;n] of numbers.</description>
-    </item>
-    <item>
-      <title>Proof for height of a binary tree</title>
-      <link>https://ttanay.github.io/blog/binary-tree-height-proof/</link>
-      <pubDate>Fri, 26 Apr 2024 00:00:00 +0000</pubDate>
-      <guid>https://ttanay.github.io/blog/binary-tree-height-proof/</guid>
-      <description>I keep forgetting the standard result of the height of a binary tree. I figured, writing out the proof on my own might help me remember the result.&#xA;We assume that the tree is a full binary tree for simplicity. A full binary tree is defined as follows[1]:&#xA;A binary tree in which each node has exactly zero or two children.&#xA;A binary tree starts with the root node at level one(we consider levels to be 1-indexed).</description>
-    </item>
-    <item>
-      <title>Query Processing In Clickhouse</title>
-      <link>https://ttanay.github.io/blog/query-processing-in-clickhouse/</link>
-      <pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate>
-      <guid>https://ttanay.github.io/blog/query-processing-in-clickhouse/</guid>
-      <description>ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.&#xA;This post is latest as on 835afe1f342.&#xA;Introduction ClickHouse is a columnar, vectorized OLAP database written in C++. We will take an example read query, and look at how the query is processed.</description>
-    </item>
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>About Me on Tanay Tummalapalli</title><link>https://ttanay.github.io/</link><description>Recent content in About Me on Tanay Tummalapalli</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Tue, 06 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://ttanay.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>K8s Vertical Pod Autoscaler's Algorithm</title><link>https://ttanay.github.io/blog/vpa-algorithm/</link><pubDate>Tue, 06 Aug 2024 00:00:00 +0000</pubDate><guid>https://ttanay.github.io/blog/vpa-algorithm/</guid><description>I tried to understand how the Vertical Pod Autoscaler(VPA) works and found a comment[1] by this gentleman(@yashbutwala) explaining in brief how it works:
+recommendations are calculated using decaying histogram of weighted samples from the metrics server, where the newer samples are assigned higher weights; older samples are decaying and hence affect less and less w.r.t. to the recommendations. CPU is calculated using the 90th percentile of all cpu samples, and memory is calculated using the 90th percentile peak over the 8 day window</description></item><item><title>How windowFunnel works in ClickHouse</title><link>https://ttanay.github.io/blog/window-funnel/</link><pubDate>Wed, 12 Jun 2024 13:06:55 +0530</pubDate><guid>https://ttanay.github.io/blog/window-funnel/</guid><description>The windowFunnel function in ClickHouse has proved useful many times for me. I wondered how it actually works. I try to explain the algorithm it uses as well as why it works.
+Background Funnels[1] are a type of visualization that track how many users progress through a set of steps. They are used to model customer journeys in different contexts like product, marketing, etc. Each step is visualized as a stage of a narrowing funnel.</description></item><item><title>Arriving at Kadane's algorithm</title><link>https://ttanay.github.io/blog/arriving-at-kadanes/</link><pubDate>Sun, 26 May 2024 00:00:00 +0000</pubDate><guid>https://ttanay.github.io/blog/arriving-at-kadanes/</guid><description>I found the explanation of Kadane&amp;rsquo;s algorithm on Wikipedia[1] too dense for a normie like me. So, I asked myself, if the algorithm were to be lost to the sands of time, how would I arrive at it naturally?
+Kadane&amp;rsquo;s algorithm is a solution to the maximum subarray problem.
+What is the maximum subarray problem? We take help from Wikipedia here.
+In computer science, the maximum sum subarray problem, also known as the maximum segment sum problem, is the task of finding a contiguous subarray with the largest sum, within a given one-dimensional array A[1&amp;hellip;n] of numbers.</description></item><item><title>Proof for height of a binary tree</title><link>https://ttanay.github.io/blog/binary-tree-height-proof/</link><pubDate>Fri, 26 Apr 2024 00:00:00 +0000</pubDate><guid>https://ttanay.github.io/blog/binary-tree-height-proof/</guid><description>I keep forgetting the standard result of the height of a binary tree. I figured, writing out the proof on my own might help me remember the result.
+We assume that the tree is a full binary tree for simplicity. A full binary tree is defined as follows[1]:
+A binary tree in which each node has exactly zero or two children.
+A binary tree starts with the root node at level one(we consider levels to be 1-indexed).</description></item><item><title>Query Processing In Clickhouse</title><link>https://ttanay.github.io/blog/query-processing-in-clickhouse/</link><pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate><guid>https://ttanay.github.io/blog/query-processing-in-clickhouse/</guid><description>ClickHouse is easily one of the fastest OLAP databases on the face of this planet. I have had the fortune of working on it at different stints. This is my attempt to best summarize my understanding of it.
+This post is latest as on 835afe1f342.
+Introduction ClickHouse is a columnar, vectorized OLAP database written in C++. We will take an example read query, and look at how the query is processed.</description></item></channel></rss>
