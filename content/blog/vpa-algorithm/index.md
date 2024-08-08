@@ -5,7 +5,7 @@ description = "A look at the Vertical Pod Autoscaler's Algorithm. Documentation 
 
 tags = ["algorithms","kubernetes","vertical-pod-autoscaler"]
 +++
-I tried to understand how the Vertical Pod Autoscaler(VPA) works and found a comment[[1]](https://github.com/kubernetes/autoscaler/issues/2747#issuecomment-616037197) by this gentleman([@yashbutwala]([https://github.com/yashbhutwala])) explaining in brief how it works:
+I tried to understand how the Vertical Pod Autoscaler(VPA) works and found a comment[[1]](https://github.com/kubernetes/autoscaler/issues/2747#issuecomment-616037197) by this gentleman([@yashbutwala](https://github.com/yashbhutwala)) explaining in brief how it works:
 > recommendations are calculated using decaying histogram of weighted samples from the metrics server, where the newer samples are assigned higher weights; older samples are decaying and hence affect less and less w.r.t. to the recommendations. CPU is calculated using the 90th percentile of all cpu samples, and memory is calculated using the 90th percentile peak over the 8 day window
 
 While digging through the VPA codebase, I tried to get at the essence of the recommender's algorithm. 
