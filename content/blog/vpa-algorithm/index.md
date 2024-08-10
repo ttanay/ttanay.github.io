@@ -8,7 +8,7 @@ tags = ["algorithms","kubernetes","vertical-pod-autoscaler"]
 I tried to understand how the Vertical Pod Autoscaler(VPA) works and found a comment[[1]](https://github.com/kubernetes/autoscaler/issues/2747#issuecomment-616037197) by this gentleman([@yashbutwala](https://github.com/yashbhutwala)) explaining in brief how it works:
 > recommendations are calculated using decaying histogram of weighted samples from the metrics server, where the newer samples are assigned higher weights; older samples are decaying and hence affect less and less w.r.t. to the recommendations. CPU is calculated using the 90th percentile of all cpu samples, and memory is calculated using the 90th percentile peak over the 8 day window
 
-While digging through the VPA codebase, I tried to get at the essence of the recommender's algorithm. 
+I wanted to dig deeper to get at the essence of the recommender's algorithm. 
 This is my attempt to document my digging. 
 
 **Note:** This post is latest as on [`402ea4176`](https://github.com/kubernetes/autoscaler/tree/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler). 
@@ -42,21 +42,28 @@ The solution space for this problem takes a few different approaches[[2]](https:
 The VPA takes the Time-series analysis approach to solving the problem. 
 
 I don't go into more high-level detail about the VPA in this post.  
-**TL;DR**: It reads metrics from Kubernetes' metrics server and analyzes samples from time-series for recommending resources. 
+**TL;DR**: It reads metrics from Kubernetes' metrics server and analyzes samples from time-series for recommending resources.   
+This talk is a really good introduction to the VPA:   
+{{< rawhtml >}}
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Y4vnYaqhS74?si=CYzCB_99weeHtJia" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+{{</ rawhtml >}}
 
 I highly recommend reading Google's paper on autoscalers for their clusters[[3]](https://research.google/pubs/autopilot-workload-autoscaling-at-google-scale/) as it seems to form the basis for the VPA's design.
 I refer to it as the "reference paper" in this post.
 
 ## The algorithm 
 In essence, the vertical pod autoscaler's algorithm aggregates the sample data collected to compute a recommendation. 
-This section is structured to present the individual abstractions that the algorithm can be thought of as composed of in their order of application.
+This section is structured to present the individual abstractions that the algorithm can be thought of as composed of in order of application.
 
 ### Raw Signal
 The raw signal is composed of samples of the resource usage captured at given intervals.   
 For CPU, simply a CPU usage sample is considered. It corresponds to the metric `container_cpu_usage_seconds_total`. 
 For Memory, the maximum sample value is considered for a given aggregation interval. It corresponds to the metric `container_memory_working_set_bytes`.  
 
-See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/input/history/history_provider.go#L286-L322).
+<!--See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/input/history/history_provider.go#L286-L322).-->
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:352px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Finput%2Fhistory%2Fhistory_provider.go%23L298-L310&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{< / rawhtml >}}
 
 ### The Histogram 
 The raw resource usage signal is then aggregated into a histogram to save space. 
@@ -64,7 +71,12 @@ The Histogram partitions the input metric(resource usage) into buckets.
 The bucket's value is the associated weight of the sample. (We get into this in detail in the next section). 
 To keep things simple, we consider the weight of the sample to be the number of ocurrences of a sample for now. 
 
-See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/util/histogram.go#L85-L104)
+<!--See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/util/histogram.go#L85-L104)-->
+
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:499px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Futil%2Fhistogram.go%23L85-L104&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{< / rawhtml >}}
+
 
 #### Exponential bucketing scheme 
 Generally, the buckets of a histogram are partitioned equally. 
@@ -74,47 +86,25 @@ To avoid that, the VPA uses a histogram with an exponential bucketing scheme whe
 This allows for having a lower granularity for extremely large values while having a high granularity for smaller and more likely values.
 
 [This comment](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/util/histogram_options.go#L53-L62) captures it well:
-```go
-// NewExponentialHistogramOptions returns HistogramOptions describing a
-// histogram with exponentially growing bucket boundaries. The first bucket
-// covers the range [0..firstBucketSize). Bucket with index n has size equal to firstBucketSize * ratio^n.
-// It follows that the bucket with index n >= 1 starts at:
-//
-//	firstBucketSize * (1 + ratio + ratio^2 + ... + ratio^(n-1)) =
-//	firstBucketSize * (ratio^n - 1) / (ratio - 1).
-//
-// The last bucket start is larger or equal to maxValue.
-```
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:289px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Futil%2Fhistogram_options.go%23L53-L62&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{< / rawhtml >}}
+
 It also uses a config option named `espilon` but we don't need to know about it for the purpose of this post. 
+
+Default ratio: [1.05 i.e. 5% larger](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/model/aggregations_config.go#L71-L72)
 
 #### Percentiles
 The percentile of a histogram is defined as the weight of the bucket that contains the \\(p\\)-th percentile value.
 This gives us a way to approximately compute a percentile.
 
 It is [computed](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/util/histogram.go#L159-L179) as:
-```go
-func (h *histogram) Percentile(percentile float64) float64 {
-	if h.IsEmpty() {
-		return 0.0
-	}
-	partialSum := 0.0
-	threshold := percentile * h.totalWeight
-	bucket := h.minBucket
-	for ; bucket < h.maxBucket; bucket++ {
-		partialSum += h.bucketWeight[bucket]
-		if partialSum >= threshold {
-			break
-		}
-	}
-	if bucket < h.options.NumBuckets()-1 {
-		// Return the end of the bucket.
-		return h.options.GetBucketStart(bucket + 1)
-	}
-	// Return the start of the last bucket (note that the last bucket
-	// doesn't have an upper bound).
-	return h.options.GetBucketStart(bucket)
-}
-```
+
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:520px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Futil%2Fhistogram.go%23L159-L179&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{< / rawhtml >}}
+
+Default percentile: [90% for target](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/recommender.go#L31-L36).
 
 ### The weight of a sample
 In a bare histogram, the weight of a bucket is it's ocurrence.
@@ -135,8 +125,11 @@ $$2^{\Large {\frac{t - t_0}{\lambda}}}$$
 
 where \\(t - t_0\\) is the relative age of given sample with respect to a reference timestamp,
 and \\(\lambda\\) is the half-life(24 hours by default). 
-
-See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/util/decaying_histogram.go#L108-L118)
+<!--
+See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/util/decaying_histogram.go#L108-L118)-->
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:310px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Futil%2Fdecaying_histogram.go%23L108-L118&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{< / rawhtml >}}
 
 #### Load-adjusted CPU usage multiplier
 The reference paper(define properly) mentions the following rationale for using load-adjusted weights for CPU:
@@ -148,27 +141,26 @@ The reference paper(define properly) mentions the following rationale for using 
 > not the sample count. 
 
 A [comment in code](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/model/aggregate_container_state.go#L207-L222) says the following: 
-```go
-// Samples are added with the weight equal to the current request. This means that
-// whenever the request is increased, the history accumulated so far effectively decays,
-// which helps react quickly to CPU starvation.
-```
-
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:184px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Fmodel%2Faggregate_container_state.go%23L210-L214&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{< / rawhtml >}}
 The problem is that the usage needs to be considered in the context of the resources available. 
 If a process was consuming 2 vCPUs when 2 vCPUs were requested, but, later consumes 2 vCPUs with 8 vCPUs requested, 
 a simple percentile won't capture this. 
 To get closer to a "utilization"-like metric, the CPU requested is considered to be the weight of a sample.
-
-See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/model/aggregate_container_state.go#L207-L222)
-
+<!--See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/model/aggregate_container_state.go#L207-L222)-->
 This figure in the reference paper highlights this point visually: 
 ![Load-adjusted CPU usage figure](./vpa_load_adjusted_cpu_figure.png)
 
 ### Safety margin
 This is simply a %age margin that the recommended request is scaled by for safety. 
 $$recommendation = (1 + safetyMargin) \times recommendation$$
+<!--See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/estimator.go#L140-L148)-->
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:100px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Flogic%2Festimator.go%23L144&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{< / rawhtml >}}
 
-See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/estimator.go#L140-L148)
+Default value: [15%](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/recommender.go#L28)
 
 ### Confidence Multiplier
 As the VPA recommends resources based on historical resource usage, 
@@ -188,19 +180,30 @@ $$\Biggl[{1 + {\frac{multiplier}{confidence}}} \Biggr] ^ {exponent}$$
 $$confidence = min(lifespan, samplesAmount)$$
 where  \\(lifespan =  t_n - t_0\\) measured in days,
 and \\(samplesAmount = {\large \frac{numSamples}{60 \times 24} }\\) such that it represents the number of days for which samples are available assuming a rate of 1 sample/minute.       
-
-See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/estimator.go#L106-L119)
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:331px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Flogic%2Frecommender.go%23L118-L129&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{< / rawhtml >}}
+<!--See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/estimator.go#L106-L119)-->
 
 ### Upper bound and Lower bound 
 The VPA recommender computes three recommendations with different settings - Lower bound, Target, and Upper bound.
 The updater component of the VPA uses this update a pod if the resource request is outside the range \\((lowerBound, upperBound)\\).
 
-See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/updater/priority/update_priority_calculator.go#L121-L124)
+<!--See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/updater/priority/update_priority_calculator.go#L121-L124)-->
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:163px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Fupdater%2Fpriority%2Fupdate_priority_calculator.go%23L121-L124&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{</ rawhtml >}}
 
 ### Minimum Resources 
 The recommender imposes a minimum value for both resources - CPU and Memory. 
+{{< rawhtml >}}
+<iframe frameborder="0" scrolling="no" style="width:100%; height:184px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Flogic%2Frecommender.go%23L76-L80&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+{{< / rawhtml >}}
+<!--See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/recommender.go#L76-L80)-->
 
-See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/recommender.go#L76-L80)
+Default value: 
+1. CPU - [0.025 vCPU](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/recommender.go#L29)
+2. Memory - [250 MB](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/recommender.go#L30)
 
 ## Conclusion
 To understand the algorithm, I think the final piece of the puzzle is the considerations for choosing a suitable algorithm that the reference paper mentions. 
