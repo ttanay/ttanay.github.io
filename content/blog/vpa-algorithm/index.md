@@ -215,3 +215,8 @@ For CPU, the risk is much less grave as an incorrect recommendation can result i
 2. https://pdfs.semanticscholar.org/74d8/8b2c2bbba11c42439ca9184c8f90f53c43fe.pdf
 3. https://research.google/pubs/autopilot-workload-autoscaling-at-google-scale/
 
+
+---
+Thanks to Shlok for the initial discussion that sparked my interest in the VPA.  
+Thanks to Ashu for encouraging me to explore the VPA.    
+Thanks to Suraj and Gaurav for reviewing this post.     
