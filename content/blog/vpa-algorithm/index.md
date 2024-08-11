@@ -120,11 +120,11 @@ The Google Autopilot paper mentions the following rationale behind introducing a
 > too-rapid response to temporary downward workload fluc-
 > tuations. 
 
-To "bias" the weight of the histogram's samples towards more recent samples, the weight of a sample is multiplied by an exponentially decaying multiplier:
+To "bias" the weight of the histogram's samples towards more recent samples, the weight of a sample is multiplied by an [exponentially decaying](https://en.wikipedia.org/wiki/Exponential_decay) multiplier:
 $$2^{\Large {\frac{t - t_0}{\lambda}}}$$
 
 where \\(t - t_0\\) is the relative age of given sample with respect to a reference timestamp,
-and \\(\lambda\\) is the half-life(24 hours by default). 
+and \\(\lambda\\) is the [half-life](https://en.wikipedia.org/wiki/Half-life)(24 hours by default). 
 <!--
 See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/util/decaying_histogram.go#L108-L118)-->
 {{< rawhtml >}}
