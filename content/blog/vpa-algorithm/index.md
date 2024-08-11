@@ -58,7 +58,7 @@ This section is structured to present the individual abstractions that the algor
 ### Raw Signal
 The raw signal is composed of samples of the resource usage captured at given intervals.   
 For CPU, simply a CPU usage sample is considered. It corresponds to the metric `container_cpu_usage_seconds_total`. 
-For Memory, the maximum sample value is considered for a given aggregation interval. It corresponds to the metric `container_memory_working_set_bytes`.  
+For Memory, the maximum sample value is considered for a given aggregation interval(default=24h). It corresponds to the metric `container_memory_working_set_bytes`.  
 
 <!--See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/input/history/history_provider.go#L286-L322).-->
 {{< rawhtml >}}
@@ -140,17 +140,17 @@ The reference paper(define properly) mentions the following rationale for using 
 > handled – i.e, we want to weight the calculation by the load,
 > not the sample count. 
 
-A [comment in code](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/model/aggregate_container_state.go#L207-L222) says the following: 
+A [comment in code](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/model/aggregate_container_state.go#L207-L222) explains it the best: 
 {{< rawhtml >}}
 <iframe frameborder="0" scrolling="no" style="width:100%; height:184px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fkubernetes%2Fautoscaler%2Fblob%2F402ea4176fea622ebb2279ada1f94232705de400%2Fvertical-pod-autoscaler%2Fpkg%2Frecommender%2Fmodel%2Faggregate_container_state.go%23L210-L214&style=atom-one-dark-reasonable&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
 {{< / rawhtml >}}
-The problem is that the usage needs to be considered in the context of the resources available. 
+This figure in the reference paper highlights this point visually: 
+![Load-adjusted CPU usage figure](./vpa_load_adjusted_cpu_figure.png)
+<!--The problem is that the usage needs to be considered in the context of the resources available. 
 If a process was consuming 2 vCPUs when 2 vCPUs were requested, but, later consumes 2 vCPUs with 8 vCPUs requested, 
 a simple percentile won't capture this. 
 To get closer to a "utilization"-like metric, the CPU requested is considered to be the weight of a sample.
 <!--See [reference location](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/model/aggregate_container_state.go#L207-L222)-->
-This figure in the reference paper highlights this point visually: 
-![Load-adjusted CPU usage figure](./vpa_load_adjusted_cpu_figure.png)
 
 ### Safety margin
 This is simply a %age margin that the recommended request is scaled by for safety. 
