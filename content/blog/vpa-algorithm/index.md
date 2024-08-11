@@ -206,7 +206,7 @@ Default value:
 2. Memory - [250 MB](https://github.com/kubernetes/autoscaler/blob/402ea4176fea622ebb2279ada1f94232705de400/vertical-pod-autoscaler/pkg/recommender/logic/recommender.go#L30)
 
 ## Conclusion
-To understand the algorithm, I think the final piece of the puzzle is the considerations for choosing a suitable algorithm that the reference paper mentions. 
+To understand the algorithm, I think the final piece of the puzzle involves the considerations for choosing a suitable algorithm that the reference paper mentions. 
 For memory, the risk of using an incorrect recommendation can lead to OOM errors. For critical workloads, the maximum peak memory usage is considered to avoid any disruption due to an OOM. For less critical ones, percentiles from \\(P_{98}\\) to even lower percentiles can be used. 
 For CPU, the risk is much less grave as an incorrect recommendation can result in CPU throttling in the worst case. Thus, we can use a percentile(eg: \\(P_{95}\\)) or even average if the workload is not CPU-bound. 
 
