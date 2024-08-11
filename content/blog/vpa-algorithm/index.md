@@ -32,7 +32,7 @@ This is my attempt to document my digging.
 
 ## Background
 The VPA solves the problem of optimal resource allocation for CPU and Memory. 
-The solution space for this problem takes a few different approaches[[2]](https://pdfs.semanticscholar.org/74d8/8b2c2bbba11c42439ca9184c8f90f53c43fe.pdf):
+The solutions to this problem take a few different approaches[[2]](https://pdfs.semanticscholar.org/74d8/8b2c2bbba11c42439ca9184c8f90f53c43fe.pdf):
 1. Threshold-based rules
 2. Re-inforcement Learning
 3. Queueing Theory 
