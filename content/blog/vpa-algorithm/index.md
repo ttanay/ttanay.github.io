@@ -1,7 +1,7 @@
 +++
 title = "K8s Vertical Pod Autoscaler's Algorithm"
 date = "2024-08-06"
-description = "A look at the Vertical Pod Autoscaler's Algorithm. Documentation of the VPA algorithm"
+description = "A look at the Vertical Pod Autoscaler's Algorithm."
 
 tags = ["algorithms","kubernetes","vertical-pod-autoscaler"]
 +++
