@@ -1,5 +1,5 @@
 +++
-title = 'About Me'
+title = 'Home'
 date = 2024-05-02T06:24:48+05:30
 +++
 ![hello](/dp.png)
@@ -13,4 +13,5 @@ I like building software for Data, Infrastructure, and Tooling.
 
 I'm also interested in Music, Films, Math, and Comedy. 
 
-**Contact**: ttanay100 [at] gmail [dot] com
+**Contact**: ttanay100 [at] gmail [dot] com  
+Github: [@ttanay](https://github.com/ttanay/)
